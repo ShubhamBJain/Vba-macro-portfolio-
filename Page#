@@ -1,0 +1,58 @@
+Sub IdentifyVisibleSheetsWithPageNumbers()
+    Dim ws As Worksheet
+    Dim pdfSheets As Object
+    Dim pageIndex As Integer
+    Dim totalPages As Integer
+    Dim outputSheet As Worksheet
+    Dim lastRow As Integer
+    Dim filePath As String
+    Dim cellA1Value As String
+    
+    ' Create a new output sheet or clear existing data
+    On Error Resume Next
+    Set outputSheet = ThisWorkbook.Sheets("SheetIndex")
+    If outputSheet Is Nothing Then
+        Set outputSheet = ThisWorkbook.Sheets.Add
+        outputSheet.Name = "SheetIndex"
+    Else
+        outputSheet.Cells.Clear
+    End If
+    On Error GoTo 0
+    
+    ' Add headers to the output sheet
+    outputSheet.Cells(1, 1).Value = "Sheet Name"
+    outputSheet.Cells(1, 2).Value = "Starting Page Number"
+    outputSheet.Cells(1, 3).Value = "Cell A1 Value"
+    
+    ' Prepare for PDF export
+    Set pdfSheets = CreateObject("Scripting.Dictionary")
+    pageIndex = 1 ' Start from the first page
+    
+    ' Loop through all sheets and determine page numbers
+    For Each ws In ThisWorkbook.Sheets
+        If ws.Visible = xlSheetVisible Then
+            totalPages = ws.PageSetup.Pages.Count
+            
+            ' Get value of cell A1, handle errors if A1 is empty
+            On Error Resume Next
+            cellA1Value = ws.Range("A1").Value
+            If cellA1Value = "" Then cellA1Value = "(Empty)"
+            On Error GoTo 0
+            
+            ' Store sheet name, starting page number, and A1 value
+            pdfSheets.Add ws.Name, Array(pageIndex, cellA1Value)
+            pageIndex = pageIndex + totalPages ' Increment for the next sheet
+        End If
+    Next ws
+    
+    ' Write to output sheet
+    lastRow = 2
+    For Each key In pdfSheets.Keys
+        outputSheet.Cells(lastRow, 1).Value = key
+        outputSheet.Cells(lastRow, 2).Value = pdfSheets(key)(0)
+        outputSheet.Cells(lastRow, 3).Value = pdfSheets(key)(1)
+        lastRow = lastRow + 1
+    Next key
+    
+    MsgBox "Sheet index, page numbers, and A1 values saved to 'SheetIndex' sheet and text file.", vbInformation, "Process Completed"
+End Sub
