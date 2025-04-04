@@ -1,0 +1,17 @@
+Function SIP_FutureValue(P As Double, R As Double, T As Double) As Double
+    ' P = Monthly SIP amount
+    ' R = Annual Rate of Return (in percentage)
+    ' T = Number of years
+
+    Dim r As Double
+    Dim n As Double
+
+    ' Convert annual return rate to monthly rate
+    r = (R / 100) / 12
+    
+    ' Calculate the number of months
+    n = T * 12
+
+    ' Future Value Formula
+    SIP_FutureValue = P * (((1 + r) ^ n - 1) / r) * (1 + r)
+End Function
