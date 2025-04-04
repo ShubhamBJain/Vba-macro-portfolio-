@@ -1,0 +1,55 @@
+Sub ExportSheetsToPDF_Ordered()
+    Dim ws As Worksheet
+    Dim sheetList As Worksheet
+    Dim sheetNames As Range, cell As Range
+    Dim sheetArray() As String
+    Dim i As Integer
+    Dim pdfPath As String
+    
+    ' Set reference to the sheet containing the sheet names
+    On Error Resume Next
+    Set sheetList = ThisWorkbook.Sheets("K-sheet")
+    If sheetList Is Nothing Then
+        MsgBox "K-sheet not found!", vbExclamation, "Error"
+        Exit Sub
+    End If
+    On Error GoTo 0
+    
+    ' Define range where sheet names are listed (A1:A10)
+    Set sheetNames = sheetList.Range("A1:A10")
+    
+    ' Initialize array for sheet names
+    i = 0
+    For Each cell In sheetNames
+        If cell.Value <> "" Then
+            ' Check if sheet exists
+            On Error Resume Next
+            Set ws = ThisWorkbook.Sheets(cell.Value)
+            On Error GoTo 0
+            
+            If Not ws Is Nothing Then
+                i = i + 1
+                ReDim Preserve sheetArray(1 To i)
+                sheetArray(i) = ws.Name
+            End If
+        End If
+    Next cell
+    
+    ' If no valid sheets found, exit
+    If i = 0 Then
+        MsgBox "No valid sheets found in K-sheet (A1:A10).", vbExclamation, "Error"
+        Exit Sub
+    End If
+    
+    ' Define PDF file path
+    pdfPath = ThisWorkbook.Path & "\Ordered_Sheets.pdf"
+    
+    ' Select sheets in specified order and export to PDF
+    ThisWorkbook.Sheets(sheetArray).Select
+    ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:=pdfPath, _
+        Quality:=xlQualityStandard, IncludeDocProperties:=True, _
+        IgnorePrintAreas:=False, OpenAfterPublish:=True
+    
+    MsgBox "PDF created successfully: " & pdfPath, vbInformation, "Success"
+End Sub
+in:sent shubham.b.jain@wellsfargo.com
